@@ -22,13 +22,13 @@ func main() {
 			tasks["kernel-"+codename+"-"+arch] = TaskInfoType{
 				LastUpstreamVersion: getLastDebianMainKernel(aptDownloader, codename, arch),
 				CheckInterval:       10 * time.Minute,
-				VersionChangeNotify: makeDefaultWebhook("pvelati/github-actions-sandbox", codename, arch),
+				VersionChangeNotify: makeDefaultWebhook("pvelati/kernel-builder-pve", codename, arch),
 			}
-			tasks["kernel-"+codename+"-"+arch+"-cloud"] = TaskInfoType{
-				LastUpstreamVersion: getLastDebianMainCloudKernel(aptDownloader, codename, arch),
-				CheckInterval:       10 * time.Minute,
-				VersionChangeNotify: makeDefaultWebhook("pvelati/github-actions-sandbox", codename, arch),
-			}
+	//		tasks["kernel-"+codename+"-"+arch+"-cloud"] = TaskInfoType{
+	//			LastUpstreamVersion: getLastDebianMainCloudKernel(aptDownloader, codename, arch),
+	//			CheckInterval:       10 * time.Minute,
+	//			VersionChangeNotify: makeDefaultWebhook("pvelati/github-actions-sandbox", codename, arch),
+	//		}
 		}
 	}
 	executeTasks(tasks)
