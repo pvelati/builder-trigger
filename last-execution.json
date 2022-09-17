@@ -1,0 +1,10 @@
+{
+	"kernel-bullseye-amd64": {
+		"CurrentVersion": "5.10.0-18",
+		"CheckTime": "2022-09-17T22:53:04.672449878Z"
+	},
+	"pve-kernel5-15": {
+		"CurrentVersion": "5.15.53-1",
+		"CheckTime": "2022-09-17T22:53:03.259178056Z"
+	}
+}
