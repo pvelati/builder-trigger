@@ -24,7 +24,7 @@ jobs:
         run: go build
 
       - name: Run
-        run: ./github-actions-sandbox
+        run: ./builder-trigger
 
       - name: Commit build files
         run: |
