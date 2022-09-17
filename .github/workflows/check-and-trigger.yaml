@@ -1,0 +1,35 @@
+---
+name: check-and-trigger
+
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '*/9 * * * *'
+
+env:
+  GH_TOKEN_TRIGGER: ${{ secrets.GH_TOKEN_TRIGGER }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: Build
+        run: go build
+
+      - name: Run
+        run: ./github-actions-sandbox
+
+      - name: Commit build files
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add last-execution.json
+          git diff-index --quiet HEAD || git commit -m "Update last-execution"
+          git push
