@@ -37,8 +37,8 @@ func makeDefaultWebhook(
 			ClientPayload: ClientPayload{
 				Repository: Repository{
 					Codename: codename,
-					Version: version,
-					Arch: arch,
+					Version:  version,
+					Arch:     arch,
 				},
 			},
 		}
