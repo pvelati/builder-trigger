@@ -17,7 +17,7 @@ func main() {
 			tasks["pve-kernel5-15"] = TaskInfoType{
 				LastUpstreamVersion: getLastPveKernel5_15(aptDownloader, codename, arch),
 				CheckInterval:       10 * time.Minute,
-				VersionChangeNotify: makeDefaultWebhook("pvelati/github-actions-sandbox", "bullseye", "amd64"),
+				VersionChangeNotify: makeDefaultWebhook("pvelati/kernel-builder-pve", "bullseye", "amd64"),
 			}
 		}
 	}
