@@ -2,9 +2,9 @@
 name: check-and-trigger
 
 on:  # yamllint disable-line rule:truthy
-  schedule:
-    - cron: '* */1 * * *'  # Every 1 hour
   workflow_dispatch:  # Trigger manually from github
+  schedule:
+    - cron: '0 * * * *'  # Every hour
 
 jobs:
   run:
