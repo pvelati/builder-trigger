@@ -1,12 +1,10 @@
 package main
 
-import "time"
-
 type TaskInfoType struct {
-	CurrentVersion string
-	CheckTime      *time.Time
+	IsTaskRunning             func() bool
+	ObtainLastTargetVersion   func() string
+	ObtainLastReleasedVersion func() string
+	VersionChangeNotify       func(version string)
 
-	CheckInterval       time.Duration        `json:"-"`
-	LastUpstreamVersion func() string        `json:"-"`
-	VersionChangeNotify func(version string) `json:"-"`
+	Tags []string
 }

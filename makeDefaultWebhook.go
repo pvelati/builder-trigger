@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 )
 
 func makeDefaultWebhook(
@@ -30,6 +28,8 @@ func makeDefaultWebhook(
 	}
 
 	return func(version string) {
+		log.Println("skip webhook")
+		return
 		log.Println("webhook for " + version + " to " + repoName)
 
 		webhookPayload := WebhookPayloadType{
@@ -55,11 +55,7 @@ func makeDefaultWebhook(
 			panic(err)
 		}
 
-		token := os.Getenv("GH_TOKEN_TRIGGER")
-		if token == "" {
-			panic(fmt.Errorf("missing token in GH_TOKEN_TRIGGER"))
-		}
-		httpReq.Header.Set("Authorization", "Bearer "+token)
+		httpReq.Header.Set("Authorization", "Bearer "+githubToken())
 		httpReq.Header.Set("Content-Type", "application/json")
 
 		resp, err := http.DefaultClient.Do(httpReq)
@@ -68,7 +64,11 @@ func makeDefaultWebhook(
 		}
 		defer resp.Body.Close()
 
-		io.Copy(ioutil.Discard, resp.Body)
+		io.Copy(io.Discard, resp.Body)
+
+		if resp.StatusCode != 200 {
+			panic(fmt.Errorf("invalid status %s", resp.Status))
+		}
 
 		log.Println("webhook result:", resp.StatusCode)
 	}

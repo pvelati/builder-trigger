@@ -1,65 +1,56 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-	"os"
-	"time"
 )
 
-func executeTasks(tasks map[string]TaskInfoType) {
-	lastExecutionJsonFilename := "last-execution.json"
-
-	previousTasks := map[string]TaskInfoType{}
-
-	{
-		previousBytes, err := ioutil.ReadFile(lastExecutionJsonFilename)
-		if err != nil {
-			if !os.IsNotExist(err) {
-				panic(err)
-			}
-		} else {
-			log.Println("loading " + lastExecutionJsonFilename)
-			if err := json.Unmarshal(previousBytes, &previousTasks); err != nil {
-				panic(err)
-			}
-		}
+func executeTasks(
+	tasks map[string]TaskInfoType,
+	filterByName string,
+	filterByTags []string,
+) {
+	if filterByName != "" {
+		log.Println("Execute only task with name:", filterByName)
+	}
+	if len(filterByTags) > 0 {
+		log.Println("Include only task with tags:", filterByTags)
 	}
 
 	for taskName, taskInfo := range tasks {
-		log.Println("task name: " + taskName)
-		runCheck := true
-		if previousTasks[taskName].CheckTime != nil {
-			lastCheckAge := time.Since(*previousTasks[taskName].CheckTime)
-			log.Println("last check age:", lastCheckAge.Truncate(time.Second))
-			runCheck = lastCheckAge > taskInfo.CheckInterval
+		queueTask := true
+		if filterByName != "" {
+			queueTask = queueTask && taskName == filterByName
 		}
-		if runCheck {
-			log.Println("checking")
-			taskInfo.CurrentVersion = taskInfo.LastUpstreamVersion()
-			t := time.Now()
-			taskInfo.CheckTime = &t
-
-			if previousTasks[taskName].CurrentVersion != taskInfo.CurrentVersion {
-				taskInfo.VersionChangeNotify(taskInfo.CurrentVersion)
+		if len(filterByTags) > 0 {
+			tagFound := false
+			for _, t1 := range taskInfo.Tags {
+				for _, t2 := range filterByTags {
+					tagFound = tagFound || t1 == t2
+				}
 			}
+			queueTask = queueTask && tagFound
+		}
 
-			tasks[taskName] = taskInfo
+		if queueTask {
+			log.Println("running task name: " + taskName)
+			isRunnig := taskInfo.IsTaskRunning()
+			if !isRunnig {
+				log.Println("checking")
+				// targetVersion := taskInfo.ObtainLastTargetVersion()
+
+				// currentVersion := taskInfo.ObtainLastReleasedVersion()
+
+				// log.Println("targetVersion: " + targetVersion)
+				// log.Println("currentVersion: " + currentVersion)
+
+				// if currentVersion != targetVersion {
+				//      taskInfo.VersionChangeNotify(targetVersion)
+				// }
+
+				// tasks[taskName] = taskInfo
+			}
 		} else {
-			log.Println("skipping check")
-			tasks[taskName] = previousTasks[taskName]
+			log.Println("skipping task name: " + taskName)
 		}
 	}
-
-	{
-		previousBytes, err := json.MarshalIndent(tasks, "", "\t")
-		if err != nil {
-			panic(err)
-		}
-		if err := ioutil.WriteFile(lastExecutionJsonFilename, previousBytes, os.FileMode(0o644)); err != nil {
-			panic(err)
-		}
-	}
-
 }
