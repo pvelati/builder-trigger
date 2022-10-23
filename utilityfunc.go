@@ -7,18 +7,20 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/pvelati/builder-trigger/aptutil"
 )
 
-func getLastReleaseInGitHubRepo(aptRepo string, filterRegexp string, compareFunctionIsLess func(v1 string, v2 string) bool) func() string {
+func getLastReleaseInGitHubRepo(aptRepo string, buildArch string, compareFunctionIsLess func(v1 string, v2 string) bool) func() string {
 
-	type oneReleaseItem struct {
-		TagName string `json:"tag_name"`
+	type Tag struct {
+		TagName string `json:"name"`
 	}
 
 	return func() string {
-		targetUrl := `https://api.github.com/repos/` + aptRepo + `/releases`
+		targetUrl := `https://api.github.com/repos/` + aptRepo + `/tags`
 
 		log.Println(targetUrl)
 
@@ -45,12 +47,28 @@ func getLastReleaseInGitHubRepo(aptRepo string, filterRegexp string, compareFunc
 			panic(fmt.Errorf("invalid status %s", resp.Status))
 		}
 
-		var items []oneReleaseItem
-		if err := json.Unmarshal(respBytes, &items); err != nil {
+		var tags []Tag
+		if err := json.Unmarshal(respBytes, &tags); err != nil {
 			panic(err)
 		}
 
+		var filterTags []Tag
+		for _, tag := range tags {
+			if contain := strings.Contains(tag.TagName, buildArch); contain {
+				filterTags = append(filterTags, tag)
+			}
+		}
+		if len(filterTags) == 0 {
+			fmt.Printf("no tags found, new release")
+		}
+
+		sort.SliceStable(filterTags, func(i, j int) bool {
+			return filterTags[i].TagName > filterTags[j].TagName
+		})
+
 		log.Println(string(respBytes))
+
+		// target_tag := filterTags[0].TagName
 
 		return ""
 	}

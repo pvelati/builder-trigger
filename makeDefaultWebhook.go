@@ -13,11 +13,13 @@ func makeDefaultWebhook(
 	repoName string,
 	codename string,
 	arch string,
+	build_arch string,
 ) func(string) {
 	type Repository struct {
-		Version  string `json:"version"`
-		Codename string `json:"codename"`
-		Arch     string `json:"arch"`
+		Version    string `json:"version"`
+		Codename   string `json:"codename"`
+		Arch       string `json:"arch"`
+		Build_arch string `json:"build_arch"`
 	}
 	type ClientPayload struct {
 		Repository Repository `json:"repository"`
@@ -36,9 +38,10 @@ func makeDefaultWebhook(
 			EventType: "trigger_build",
 			ClientPayload: ClientPayload{
 				Repository: Repository{
-					Codename: codename,
-					Version:  version,
-					Arch:     arch,
+					Codename:   codename,
+					Version:    version,
+					Arch:       arch,
+					Build_arch: build_arch,
 				},
 			},
 		}
